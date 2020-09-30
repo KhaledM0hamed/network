@@ -1,5 +1,24 @@
 {% extends "network/layout.html" %}
-
+{% load static %}
 {% block body %}
-    TODO
+
+    <div class="container">
+        {% if message %}    
+            <div>{{ message }}</div>
+        {% endif %}
+    
+        <!-- It appear only to logged users -->
+        {% if user.is_authenticated %}
+        <div>
+            <h6> Make a new post</h6>
+            <form action="{% url 'new_post' %}" method="POST">
+                {% csrf_token %}
+                <textarea name="new_content" id="" cols="150" rows="5"></textarea>
+                <br>
+                <button type="submit"> Post! </button>
+            </form>
+        </div>
+        {% endif%}
+
+    </div>
 {% endblock %}
