@@ -30,7 +30,7 @@ class Post(models.Model):
         except:
             return None
 
-    def serialize(self):
+    def short(self):
         return {
             "id": self.id,
             "content": self.content,

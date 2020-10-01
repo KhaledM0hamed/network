@@ -9,7 +9,10 @@ from .models import User, Post, Follower
 
 
 def index(request):
-    return render(request, "network/index.html")
+    posts = Post.objects.all().order_by('-create_date')
+    return render(request, "network/index.html", {
+        'posts': [post.short() for post in posts]
+    })
 
 
 def login_view(request):
@@ -79,10 +82,12 @@ def new_post(request):
                     "message": "Some thing went wrong"
                 })
         else:
-            return render(request, "network/index.html", {
+            return HttpResponseRedirect(request, "network/index.html", {
                 "message": "you can't post nothing"
             })
     else:
         return render(request, "network/index.html", {
             "message": "it's not a POST request"
         })
+
+

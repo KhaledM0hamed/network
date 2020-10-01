@@ -19,6 +19,23 @@
             </form>
         </div>
         {% endif%}
+        <div id='all_posts'>
+            {% for post in posts %}
+                <div>
+                    <div> 
+                        <h6>Posted by : <span style="color: gray;">{{post.creator}}</span></h6>
+                        <span style="float: right;">{{post.create_date}}</span>
+                    </div>
+                    <h4> {{ post.content }}</h4>
+                    <div> 
+                        <button id = "like">Like</button>
+                        <span>{{post.total_likes}}</span>
+                    </div>
+                </div>
+                <hr>
+            {% endfor %}
+
+        </div>
 
     </div>
 {% endblock %}
