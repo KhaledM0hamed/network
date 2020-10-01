@@ -1,0 +1,68 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('#follow').addEventListener('click', () => {
+            username = document.querySelector('#user').innerHTML;
+            console.log(username)
+            fetch('/follow', {
+                method: 'POST',
+                body: JSON.stringify({
+                    follow: username
+                })
+            })
+
+            follow_btn = document.querySelector('#follow');
+            if (follow_btn.innerHTML === 'unfollow'){
+                follow_btn.innerHTML = 'follow';
+            }else{
+                follow_btn.innerHTML = 'unfollow';
+            }
+        })
+    });
+</script>
+
+<div class="container">
+    <div>
+    <span><h1 id="user">{{ info.username }}</h1></span>
+    {% if user.username != info.username %}
+        {% if is_following %}
+            <span style="float: right;"><button id='follow'>unfollow</button></span>
+        {% else %}
+            <span style="float: right;"><button id='follow'>follow</button></span>
+        {% endif %}
+    {% endif %}
+    </div>
+    <div>
+        <span>Followed by</span>
+        <span>{{ count_followers }}</span>
+    </div>
+    <div>
+        <span>Following </span>
+        <span>{{ count_following }}</span>
+    </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <div id='all_posts'>
+        {% for post in posts %}
+            <div>
+                <div> 
+                    <span style="float: right;">{{post.create_date}}</span>
+                </div>
+                <h4> {{ post.content }}</h4>
+                <div> 
+                    <button id = "like">Like</button>
+                    <span>{{post.total_likes}}</span>
+                </div>
+            </div>
+            <hr>
+            <br>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}
