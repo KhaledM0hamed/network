@@ -2,6 +2,57 @@
 {% load static %}
 {% block body %}
 <script>
+    
+    document.addEventListener('DOMContentLoaded', function(){
+        var editBtns = document.getElementsByClassName('edit')
+        console.log(editBtns.length)
+        for(var i = 0; i <= editBtns.length; i++){
+            editBtns[i].addEventListener('click', function(){
+
+                var postId = this.dataset.id                
+                post = document.getElementById(`post${postId}`)
+                postContent = post.innerHTML;
+                post.hidden = true
+
+                edit = document.getElementById(`edit${postId}`)
+                edit.hidden = true
+
+                editArea = document.getElementById(`editArea${postId}`)
+                editArea.innerHTML = `<textarea id="textArea${postId}" name="w3review" rows="2" cols="50">${postContent}</textarea>`
+                editArea.innerHTML += `<br> <button id="save${postId}"> Save </button> <br> <br>`
+
+                document.getElementById(`save${postId}`).addEventListener('click', function(){
+                    textArea = document.getElementById(`textArea${postId}`)
+                    var newPostContent = textArea.value;
+                    var url = '/updatePost/'
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'content-Type':'application/json',
+                        },
+                        body: JSON.stringify({
+                            'newPostContent': newPostContent,
+                            'postId': postId
+                        })
+                    })
+
+                    .then((response) =>{
+                        return response.json()
+                    })
+
+                    .then((data) => {
+                        editArea.hidden = true
+                        post.hidden = false
+                        post.innerHTML = newPostContent
+                        edit.hidden = false
+                    })
+
+                })
+            })
+        }
+    })
+
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#follow').addEventListener('click', () => {
             username = document.querySelector('#user').innerHTML;
@@ -21,6 +72,8 @@
             }
         })
     });
+
+
 </script>
 
 <div class="container">
@@ -45,18 +98,28 @@
 
     <br>
     <br>
-    <br>
-    <br>
     <div id='all_posts'>
         {% for post in posts %}
             <div>
                 <div> 
                     <span style="float: right;">{{post.create_date}}</span>
                 </div>
-                <h4> {{ post.content }}</h4>
-                <div> 
-                    <button id = "like">Like</button>
+                <h4 id= "post{{post.pk}}"> {{ post.content }}</h4>
+
+                <div id="editArea{{post.pk}}"></div>
+
+                <div class="btns-section"> 
+                    {% if user.pk in post.likes%}
+                    <button id='like{{post.pk}}' data-action="unlike" data-id="{{post.pk}}" class = "like">unlike</button>
+                    {% else %}
+                    <button id='like{{post.pk}}' data-action="like" data-id="{{post.pk}}" class = "like">like</button>
+                    {% endif%}
                     <span>{{post.total_likes}}</span>
+                    {% if user.username == info.username %}
+                        <span style="float: right;">
+                            <button class= "edit" id="edit{{ post.pk }}" data-id= "{{ post.pk }}">Edit</button>
+                        </span>
+                    {% endif %}
                 </div>
             </div>
             <hr>
@@ -65,4 +128,22 @@
 
     </div>
 </div>
+
+<div class="pagination container">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span> 
+            </div>
 {% endblock %}

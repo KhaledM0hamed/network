@@ -15,7 +15,7 @@ class Follower(models.Model):
         unique_together = ('follower', 'following')
 
     def __str__(self):
-        return f"{self.follower} is followed by {self.following}"
+        return str(self.following.id) 
     
 
 class Post(models.Model):
@@ -32,7 +32,7 @@ class Post(models.Model):
 
     def short(self):
         return {
-            "id": self.id,
+            "pk": self.id,
             "content": self.content,
             "creator_id": self.creator.id,
             "creator": self.creator.username,

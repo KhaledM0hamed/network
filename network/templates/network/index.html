@@ -1,6 +1,86 @@
 {% extends "network/layout.html" %}
 {% load static %}
 {% block body %}
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function(){
+            var likeBtns = document.getElementsByClassName('like')
+            console.log(likeBtns)
+            for (var i = 0 ; i <= likeBtns.length ; i++){
+                likeBtns[i].addEventListener('click', function(){
+                    var postAction = this.dataset.action
+                    var postId = this.dataset.id 
+
+                    if (postAction == 'like'){
+                        var url = '/likePost/'
+                        like(url, postId)
+                    }else{
+                        var url = '/unlikePost/'
+                        unlike(url, postId)
+                    }
+
+
+                })
+            }
+        })
+
+        function unlike(url, postId){
+            
+            fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'content-Type':'application/json',
+                        },
+                        body: JSON.stringify({
+                            'postId': postId
+                        })
+                    })
+
+                    .then((response) =>{
+                        return response.json()
+                    })
+
+                    .then((data) => {
+                        total = document.getElementById(`totalLikes${postId}`).innerHTML 
+                        document.getElementById(`totalLikes${postId}`).innerHTML = parseInt(total) - 1
+                        
+                        btn = document.getElementById(`like${postId}`)
+                        btn.dataset.action = "like"
+                        btn. innerHTML = 'like'
+                    })
+        }
+
+        function like(url, postId){
+            fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'content-Type':'application/json',
+                        },
+                        body: JSON.stringify({
+                            'postId': postId
+                        })
+                    })
+
+                    .then((response) =>{
+                        return response.json()
+                    })
+
+                    .then((data) => {
+                        total = document.getElementById(`totalLikes${postId}`).innerHTML 
+                        console.log(parseInt(total))
+                        document.getElementById(`totalLikes${postId}`).innerHTML = parseInt(total) + 1
+                        
+                        likeBtn = document.getElementById(`like${postId}`)
+                        
+                        btn = document.getElementById(`like${postId}`)
+                        btn.dataset.action = "unlike"
+                        btn. innerHTML = 'unlike'
+                        
+                        
+                    })
+        }
+
+    </script>
 
     <div class="container">
         {% if message %}    
@@ -13,12 +93,14 @@
             <h6> Make a new post</h6>
             <form action="{% url 'new_post' %}" method="POST">
                 {% csrf_token %}
-                <textarea name="new_content" id="" cols="150" rows="5"></textarea>
+                <textarea name="new_content" id="" cols="150" rows="3"></textarea>
                 <br>
                 <button type="submit"> Post! </button>
             </form>
         </div>
         {% endif%}
+
+        <hr>
         <div id='all_posts'>
             {% for post in posts %}
                 <div>
@@ -27,10 +109,15 @@
                         <span style="float: right;">{{post.create_date}}</span>
                     </div>
                     <h4> {{ post.content }}</h4>
-                    <div> 
-                        <button id = "like">Like</button>
-                        <span>{{post.total_likes}}</span>
+                    <div class="likeArea"> 
+                        {% if user.pk in post.likes%}
+                        <button id='like{{post.pk}}' data-action="unlike" data-id="{{post.pk}}" class = "like">unlike</button>
+                        {% else %}
+                        <button id='like{{post.pk}}' data-action="like" data-id="{{post.pk}}" class = "like">like</button>
+                        {% endif%}
+                        <span id="totalLikes{{post.pk}}">{{post.total_likes}}</span>
                     </div>
+                    
                 </div>
                 <hr>
             {% endfor %}
@@ -38,4 +125,23 @@
         </div>
 
     </div>
+
+    <div class="pagination container" style="float: right;">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span> 
+            </div>
 {% endblock %}
+
